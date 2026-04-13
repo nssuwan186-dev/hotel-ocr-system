@@ -18,12 +18,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm ci
+        run: npm install
 
       - name: Build Web App
         working-directory: ./frontend
@@ -32,17 +30,14 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Create Android WebView Project
+      - name: Create Android project structure
         run: |
-          cd frontend
-          mkdir -p android/app/src/main/assets
-          cp -r dist/* android/app/src/main/assets/
-          
-          mkdir -p android/app/src/main/java/com/umi/hotel
-          mkdir -p android/app/src/main/res/values
-          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p frontend/android/app/src/main/assets
+          cp -r frontend/dist/* frontend/android/app/src/main/assets/
+          mkdir -p frontend/android/app/src/main/java/com/umi/hotel
+          mkdir -p frontend/android/app/src/main/res/values
 
-      - name: Write Android Manifest
+      - name: Write Android project files
         run: |
           cat > frontend/android/app/src/main/AndroidManifest.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
@@ -51,9 +46,7 @@ jobs:
               <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
               <application
                   android:allowBackup="true"
-                  android:icon="@mipmap/ic_launcher"
                   android:label="U'mi Hotel"
-                  android:supportsRtl="true"
                   android:theme="@style/AppTheme"
                   android:usesCleartextTraffic="true">
                   <activity
@@ -70,33 +63,22 @@ jobs:
           </manifest>
           EOF
 
-      - name: Write MainActivity.java
-        run: |
           cat > frontend/android/app/src/main/java/com/umi/hotel/MainActivity.java << 'EOF'
           package com.umi.hotel;
-
           import android.os.Bundle;
           import androidx.appcompat.app.AppCompatActivity;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
           import android.webkit.WebSettings;
-
           public class MainActivity extends AppCompatActivity {
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-                  
                   WebView webView = new WebView(this);
                   WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
-                  settings.setAllowFileAccess(true);
-                  settings.setAllowContentAccess(true);
-                  settings.setCacheMode(WebSettings.LOAD_DEFAULT);
-                  settings.setLoadWithOverviewMode(true);
-                  settings.setUseWideViewPort(true);
                   settings.setDatabaseEnabled(true);
-                  
                   webView.setWebViewClient(new WebViewClient() {
                       @Override
                       public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -104,25 +86,18 @@ jobs:
                           return true;
                       }
                   });
-                  
                   webView.loadUrl("file:///android_asset/index.html");
                   setContentView(webView);
               }
-              
               @Override
               public void onBackPressed() {
                   WebView webView = (WebView) findViewById(android.R.id.content);
-                  if (webView.canGoBack()) {
-                      webView.goBack();
-                  } else {
-                      super.onBackPressed();
-                  }
+                  if (webView.canGoBack()) { webView.goBack(); }
+                  else { super.onBackPressed(); }
               }
           }
           EOF
 
-      - name: Write strings.xml
-        run: |
           cat > frontend/android/app/src/main/res/values/strings.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
@@ -130,43 +105,31 @@ jobs:
           </resources>
           EOF
 
-      - name: Write colors.xml
-        run: |
           cat > frontend/android/app/src/main/res/values/colors.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <color name="primary">#006D36</color>
-              <color name="primary_dark">#004D26</color>
               <color name="white">#FFFFFF</color>
-              <color name="black">#000000</color>
           </resources>
           EOF
 
-      - name: Write themes.xml
-        run: |
           cat > frontend/android/app/src/main/res/values/themes.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
                   <item name="colorPrimary">@color/primary</item>
-                  <item name="colorPrimaryDark">@color/primary_dark</item>
-                  <item name="android:statusBarColor">@color/primary</item>
                   <item name="android:windowBackground">@color/white</item>
               </style>
           </resources>
           EOF
 
-      - name: Write build.gradle
+      - name: Write Gradle files
         run: |
           cat > frontend/android/app/build.gradle << 'EOF'
-          plugins {
-              id 'com.android.application'
-          }
-          
+          plugins { id 'com.android.application' }
           android {
               namespace 'com.umi.hotel'
               compileSdk 34
-              
               defaultConfig {
                   applicationId "com.umi.hotel"
                   minSdk 22
@@ -174,77 +137,44 @@ jobs:
                   versionCode 1
                   versionName "1.0.0"
               }
-              
-              buildTypes {
-                  release {
-                      minifyEnabled false
-                      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-                  }
-              }
-              
+              buildTypes { release { minifyEnabled false } }
               compileOptions {
                   sourceCompatibility JavaVersion.VERSION_17
                   targetCompatibility JavaVersion.VERSION_17
               }
           }
-          
           dependencies {
               implementation 'androidx.appcompat:appcompat:1.6.1'
               implementation 'androidx.core:core:1.12.0'
           }
           EOF
 
-      - name: Write settings.gradle
-        run: |
           cat > frontend/android/settings.gradle << 'EOF'
           pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
           }
-          
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
+              repositories { google(); mavenCentral() }
           }
-          
           rootProject.name = "UmiHotel"
           include ':app'
           EOF
 
-      - name: Write gradle.properties
-        run: |
           cat > frontend/android/gradle.properties << 'EOF'
-          org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
+          org.gradle.jvmargs=-Xmx2048m
           android.useAndroidX=true
-          android.enableJetifier=true
           EOF
 
-      - name: Create local.properties
-        run: |
           echo "sdk.dir=$ANDROID_HOME" > frontend/android/local.properties
 
       - name: Build Debug APK
         working-directory: ./frontend/android
-        run: |
-          chmod +x gradlew 2>/dev/null || true
-          ./gradlew assembleDebug --no-daemon 2>&1 || echo "Trying alternative build..."
+        run: ./gradlew assembleDebug --no-daemon
 
-      - name: Check APK output
-        run: |
-          ls -la frontend/android/app/build/outputs/apk/debug/ 2>/dev/null || echo "Checking alternative paths..."
-          ls -la frontend/android/app/build/outputs/apk/ 2>/dev/null || echo "APK not found in standard path"
-
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: umi-hotel-debug-apk
-          path: |
-            frontend/android/app/build/outputs/apk/debug/*.apk
-            frontend/android/app/build/outputs/apk/**/*.apk
+          path: frontend/android/app/build/outputs/apk/debug/*.apk
           retention-days: 7
