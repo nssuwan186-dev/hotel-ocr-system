@@ -29,49 +29,13 @@ jobs:
 
       - name: Copy web assets
         run: |
+          mkdir -p frontend/android/app/src/main/assets
           cp -r frontend/dist/* frontend/android/app/src/main/assets/
-          ls frontend/android/app/src/main/assets/
 
-      - name: Create gradle wrapper files
-        working-directory: ./frontend/android
+      - name: Setup project files
         run: |
-          mkdir -p gradle/wrapper
-          curl -L -o gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.5.0/gradle/wrapper/gradle-wrapper.jar
+          echo "sdk.dir=$ANDROID_HOME" > frontend/android/local.properties
           
-          cat > gradle/wrapper/gradle.properties << 'EOF'
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
-          networkTimeout=10000
-          validateDistributionUrl=true
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          EOF
-
-      - name: Write gradlew script
-        run: |
-          cat > frontend/android/gradlew << 'GRADLEW'
-          #!/bin/sh
-          APP_NAME="Gradle"
-          APP_BASE_NAME=$(basename "$0")
-          DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
-          GRADLE_HOME=$(mktemp -d)
-          GRADLE_USER_HOME="${GRADLE_USER_HOME:-${HOME}/.gradle}"
-          
-          if [ -z "$GRADLE_HOME" ]; then
-            GRADLE_HOME=$(dirname "$0")/..
-          fi
-          
-          CLASSPATH=$GRADLE_HOME/gradle/wrapper/gradle-wrapper.jar
-          
-          CLASSPATH=$CLASSPATH:$GRADLE_HOME/gradle/wrapper/gradle-wrapper.properties
-          
-          exec java $DEFAULT_JVM_OPTS -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
-          GRADLEW
-          chmod +x frontend/android/gradlew
-
-      - name: Write settings.gradle
-        run: |
           cat > frontend/android/settings.gradle << 'EOF'
           pluginManagement {
               repositories {
@@ -84,13 +48,12 @@ jobs:
           include ':app'
           EOF
 
-      - name: Write local.properties
-        run: |
-          echo "sdk.dir=$ANDROID_HOME" > frontend/android/local.properties
-
       - name: Build Debug APK
         working-directory: ./frontend/android
-        run: ./gradlew assembleDebug --no-daemon
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip -O gradle.zip
+          unzip -q gradle.zip
+          ./gradle-8.5/bin/gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
