@@ -32,8 +32,6 @@ jobs:
           mkdir -p frontend/android/app/src/main/assets
           rm -rf frontend/android/app/src/main/assets/*
           cp -r frontend/dist/* frontend/android/app/src/main/assets/
-          rm -f frontend/android/app/src/main/res/values/strings.xml
-          rm -f frontend/android/app/src/main/res/values/colors.xml
 
       - name: Build Debug APK
         run: |
