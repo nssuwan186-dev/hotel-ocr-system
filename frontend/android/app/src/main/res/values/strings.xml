@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">U\'mi Hotel</string>
-    <color name="primary">#006D36</color>
-    <color name="primary_dark">#004D26</color>
-    <color name="accent">#006D36</color>
+    <string name="app_name">Umi Hotel</string>
 </resources>
