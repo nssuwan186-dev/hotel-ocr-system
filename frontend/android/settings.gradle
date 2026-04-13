@@ -16,5 +16,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "UmiHotel"
 include ':app'
-include ':capacitor-android'
-project(':capacitor-android').projectDir = new File(rootProject.projectDir, '../node_modules/@capacitor/android/capacitor')

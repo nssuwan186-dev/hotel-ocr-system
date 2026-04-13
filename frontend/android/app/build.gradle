@@ -1,8 +1,4 @@
 buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.0'
     }
@@ -20,8 +16,6 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -36,10 +30,7 @@ android {
     }
 }
 
-repositories {
-    google()
-    mavenCentral()
-}
+
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
