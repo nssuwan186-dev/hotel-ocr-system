@@ -31,6 +31,11 @@ jobs:
         run: |
           cp -r frontend/dist/* frontend/android/app/src/main/assets/
 
+      - name: Setup Gradle Wrapper
+        working-directory: ./frontend/android
+        run: |
+          gradle wrapper --gradle-version=8.5
+
       - name: Build Debug APK
         working-directory: ./frontend/android
         run: |
