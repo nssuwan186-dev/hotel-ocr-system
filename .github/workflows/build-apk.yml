@@ -30,27 +30,38 @@ jobs:
       - name: Copy web assets
         run: |
           mkdir -p frontend/android/app/src/main/assets
+          rm -rf frontend/android/app/src/main/assets/*
           cp -r frontend/dist/* frontend/android/app/src/main/assets/
-
-      - name: Setup project files
-        run: |
-          echo "sdk.dir=$ANDROID_HOME" > frontend/android/local.properties
-          
-          cat > frontend/android/settings.gradle << 'EOF'
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          rootProject.name = "UmiHotel"
-          include ':app'
-          EOF
 
       - name: Build Debug APK
         working-directory: ./frontend/android
         run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          
+          # Remove duplicate files
+          rm -f app/src/main/res/values/strings.xml app/src/main/res/values/colors.xml
+          
+          # Write minimal resources only if not exist
+          if [ ! -f app/src/main/res/values/strings.xml ]; then
+            cat > app/src/main/res/values/strings.xml << 'EOF'
+            <?xml version="1.0" encoding="utf-8"?>
+            <resources>
+                <string name="app_name">Umi Hotel</string>
+            </resources>
+            EOF
+          fi
+          
+          if [ ! -f app/src/main/res/values/colors.xml ]; then
+            cat > app/src/main/res/values/colors.xml << 'EOF'
+            <?xml version="1.0" encoding="utf-8"?>
+            <resources>
+                <color name="primary">#006D36</color>
+                <color name="white">#FFFFFF</color>
+            </resources>
+            EOF
+          fi
+          
+          # Download gradle
           wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip -O gradle.zip
           unzip -q gradle.zip
           ./gradle-8.5/bin/gradle assembleDebug
