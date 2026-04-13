@@ -1,0 +1,117 @@
+version: "3.0"
+
+complexity_scoring:
+  factors:
+    query_length:
+      short: 0-50
+      medium: 51-200
+      long: 200+
+    has_numbers:
+      none: 0
+      simple: 1-3
+      complex: 4+
+    has_dates:
+      none: 0
+      single: 1
+      range: 2
+      multiple_ranges: 3
+    requires_aggregation:
+      false: 0
+      true: 2
+    historical_data_needed:
+      false: 0
+      days: 1
+      weeks: 2
+      months: 3
+  thresholds:
+    low: 0-3
+    medium: 4-6
+    high: 7-10
+    critical: 11+
+
+intent_detection:
+  patterns:
+    slip_upload:
+      keywords: ["สลิป", "โอนเงิน", "transfer", "slip", "รูปภาพ", "แนบรูป"]
+      requires_vision: true
+      priority: 10
+
+    balance_query:
+      keywords: ["ยอด", "สรุป", "เท่าไร", "เท่าไหร่", "balance", "summary"]
+      requires_sql: true
+      cacheable: true
+
+    room_query:
+      keywords: ["ห้อง", "ว่าง", "จอง", "เช็คอิน", "เช็คเอาท์", "room"]
+      requires_sql: true
+
+    customer_query:
+      keywords: ["ลูกค้า", "ค้นหา", "เบอร์", "ชื่อ", "customer"]
+      requires_sql: true
+      privacy_level: high
+
+    report_request:
+      keywords: ["รายงาน", "ส่งรายงาน", "excel", "รายเดือน", "รายสัปดาห์"]
+      requires_generation: true
+      async_processing: true
+
+    prediction_request:
+      keywords: ["คาดการณ์", "ทำนาย", "แนวโน้ม", "prediction", "forecast"]
+      requires_deep_analysis: true
+
+    system_command:
+      prefixes: ["/", "!"]
+      keywords: ["/pro", "/local", "/claude", "/vision", "/offline", "/economy"]
+      bypass_routing: true
+
+manual_overrides:
+  /pro:
+    description: "ใช้ Gemini Pro สำหรับคำถามนี้"
+    model: gemini-2.0-pro
+    persist_for: 3_messages
+
+  /local:
+    description: "ใช้ Local LLM เท่านั้น"
+    model: llama3.2-local
+    persist_for: session
+
+  /claude:
+    description: "ใช้ Claude สำหรับเอกสารซับซ้อน"
+    model: claude-3-5-sonnet
+    persist_for: 5_messages
+
+  /vision:
+    description: "บังคับใช้ Vision model"
+    force_vision: true
+    model: gemini-2.0-flash
+
+  /offline:
+    description: "โหมดออฟไลน์ ใช้ Local เท่านั้น"
+    mode: offline
+
+  /economy:
+    description: "โหมดประหยัด"
+    mode: economy
+
+  /auto:
+    description: "กลับสู่โหมดอัตโนมัติ (default)"
+    mode: auto
+    clear_override: true
+
+error_handling:
+  api_error:
+    retry_with: gemini-1.5-flash
+    max_retries: 2
+    notify_user: true
+
+  rate_limit:
+    fallback_to: gpt-4o-mini
+    notify_user: true
+
+  timeout:
+    fallback_to: llama3.2-local
+    timeout_seconds: 30
+
+  invalid_response:
+    retry_with_same_model: true
+    max_retries: 1

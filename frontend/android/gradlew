@@ -1,0 +1,15 @@
+#!/bin/bash
+# Gradle Wrapper - Minimal version for building APK
+
+APP_HOME="$(cd "$(dirname "$0")" && pwd)"
+CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+
+# Find Java
+if [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+    JAVA="$JAVA_HOME/bin/java"
+else
+    JAVA="java"
+fi
+
+# Execute
+exec "$JAVA" -Xmx64m -Xms64m -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"

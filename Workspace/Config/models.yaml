@@ -1,0 +1,169 @@
+version: "3.0"
+last_updated: "2026-04-09"
+
+default_model: gemini-2.0-flash
+
+modes:
+  auto: auto
+  manual: manual
+  offline: offline
+  economy: economy
+
+models:
+  gemini-2.0-flash:
+    provider: google
+    model_id: gemini-2.0-flash-exp
+    api_key_env: GEMINI_API_KEY
+    base_url: https://generativelanguage.googleapis.com/v1beta
+    max_tokens: 8192
+    temperature: 0.3
+    capabilities:
+      vision: true
+      function_calling: true
+      json_mode: true
+      streaming: true
+    thai_optimized: true
+    cost_per_1k_input: 0.0
+    cost_per_1k_output: 0.0
+    rate_limit_per_minute: 15
+    priority: 1
+
+  gemini-2.0-pro:
+    provider: google
+    model_id: gemini-2.0-pro-exp-02-05
+    api_key_env: GEMINI_API_KEY
+    max_tokens: 32768
+    temperature: 0.2
+    capabilities:
+      vision: true
+      function_calling: true
+      json_mode: true
+      streaming: true
+    thai_optimized: true
+    cost_per_1k_input: 0.0
+    cost_per_1k_output: 0.0
+    rate_limit_per_minute: 5
+    priority: 2
+
+  gemini-1.5-flash:
+    provider: google
+    model_id: gemini-1.5-flash
+    api_key_env: GEMINI_API_KEY
+    max_tokens: 8192
+    temperature: 0.3
+    capabilities:
+      vision: true
+      function_calling: true
+      json_mode: true
+    thai_optimized: true
+    cost_per_1k_input: 0.075
+    cost_per_1k_output: 0.30
+    priority: 3
+
+  gpt-4o:
+    provider: openai
+    model_id: gpt-4o
+    api_key_env: OPENAI_API_KEY
+    base_url: https://api.openai.com/v1
+    max_tokens: 4096
+    temperature: 0.3
+    capabilities:
+      vision: true
+      function_calling: true
+      json_mode: true
+      streaming: true
+    cost_per_1k_input: 2.50
+    cost_per_1k_output: 10.00
+    priority: 4
+
+  gpt-4o-mini:
+    provider: openai
+    model_id: gpt-4o-mini
+    api_key_env: OPENAI_API_KEY
+    max_tokens: 4096
+    temperature: 0.4
+    capabilities:
+      vision: true
+      function_calling: true
+      json_mode: true
+    cost_per_1k_input: 0.15
+    cost_per_1k_output: 0.60
+    priority: 5
+
+  claude-3-5-sonnet:
+    provider: anthropic
+    model_id: claude-3-5-sonnet-20241022
+    api_key_env: ANTHROPIC_API_KEY
+    base_url: https://api.anthropic.com/v1
+    max_tokens: 8192
+    temperature: 0.3
+    capabilities:
+      vision: true
+      function_calling: true
+      streaming: true
+    cost_per_1k_input: 3.00
+    cost_per_1k_output: 15.00
+    priority: 6
+
+  llama3.2-local:
+    provider: ollama
+    model_id: llama3.2
+    base_url: http://localhost:11435
+    max_tokens: 4096
+    temperature: 0.4
+    capabilities:
+      vision: false
+      function_calling: false
+      streaming: true
+    requires_internet: false
+    priority: 7
+
+  qwen2.5-local:
+    provider: ollama
+    model_id: qwen2.5:7b
+    base_url: http://localhost:11435
+    max_tokens: 4096
+    temperature: 0.3
+    thai_optimized: true
+    requires_internet: false
+    priority: 8
+
+routing_rules:
+  vision_analysis:
+    required_capabilities: [vision]
+    preferred: [gemini-2.0-flash, gemini-2.0-pro, gpt-4o]
+    fallback: gemini-1.5-flash
+
+  thai_complex:
+    thai_required: true
+    preferred: [gemini-2.0-pro, gemini-2.0-flash, qwen2.5-local]
+    fallback: gemini-1.5-flash
+
+  deep_analysis:
+    required_capabilities: [function_calling]
+    preferred: [gemini-2.0-pro, claude-3-5-sonnet, gpt-4o]
+    fallback: gemini-2.0-flash
+
+  quick_chat:
+    preferred: [gemini-2.0-flash, gpt-4o-mini, llama3.2-local]
+    fallback: qwen2.5-local
+
+  sql_generation:
+    required_capabilities: [json_mode]
+    preferred: [gemini-2.0-flash, gpt-4o-mini]
+    fallback: llama3.2-local
+
+  economy_mode:
+    cost_limit_per_request: 0.01
+    preferred: [gemini-2.0-flash, llama3.2-local]
+
+fallback:
+  enabled: true
+  max_retries: 3
+  retry_delay_seconds: 2
+  offline_fallback: llama3.2-local
+
+cache:
+  enabled: true
+  ttl_seconds: 300
+  max_entries: 100

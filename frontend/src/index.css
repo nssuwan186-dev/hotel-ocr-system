@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface font-sans text-text antialiased;
+  }
+}
+
+@layer components {
+  /* Neumorphism Base Classes */
+  .neu {
+    @apply bg-surface-light shadow-neu rounded-neu;
+  }
+  
+  .neu-sm {
+    @apply bg-surface-light shadow-neu-sm rounded-2xl;
+  }
+  
+  .neu-inset {
+    @apply bg-surface-light shadow-neu-inset rounded-neu;
+  }
+  
+  .neu-inset-sm {
+    @apply bg-surface-light shadow-neu-inset-sm rounded-2xl;
+  }
+  
+  /* Neumorphism Button */
+  .neu-btn {
+    @apply px-4 py-2 bg-surface-light shadow-neu-sm rounded-xl 
+           text-text-muted font-medium text-sm
+           hover:text-primary active:shadow-neu-inset-sm
+           transition-all duration-200 ease-out
+           flex items-center justify-center gap-2;
+  }
+  
+  .neu-btn-primary {
+    @apply bg-primary text-white shadow-neu-sm
+           hover:bg-primary-light active:shadow-neu-inset-sm;
+  }
+  
+  .neu-btn-icon {
+    @apply p-3 bg-surface-light shadow-neu-sm rounded-xl
+           text-text-muted hover:text-primary
+           active:shadow-neu-inset-sm transition-all;
+  }
+  
+  /* Neumorphism Card */
+  .neu-card {
+    @apply p-4 bg-surface-light shadow-neu rounded-neu;
+  }
+  
+  .neu-card-inset {
+    @apply p-4 bg-surface-light shadow-neu-inset rounded-neu;
+  }
+  
+  /* Neumorphism Input */
+  .neu-input {
+    @apply w-full px-4 py-3 bg-surface-light shadow-neu-inset-sm rounded-xl
+           text-text text-sm placeholder:text-text-light
+           outline-none border-none
+           focus:ring-2 focus:ring-primary/20;
+  }
+  
+  /* Neumorphism Badge */
+  .neu-badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .neu-badge-success {
+    @apply bg-primary/10 text-primary;
+  }
+  
+  .neu-badge-warning {
+    @apply bg-amber-100 text-amber-600;
+  }
+  
+  .neu-badge-info {
+    @apply bg-blue-100 text-blue-600;
+  }
+  
+  /* Neumorphism Stats Card */
+  .neu-stat {
+    @apply p-4 bg-surface-light shadow-neu-inset-sm rounded-2xl;
+  }
+  
+  /* Neumorphism Progress */
+  .neu-progress {
+    @apply h-2 bg-surface-light shadow-neu-inset-sm rounded-full overflow-hidden;
+  }
+  
+  .neu-progress-bar {
+    @apply h-full bg-primary rounded-full transition-all duration-500;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface-light rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-dark rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-text-light;
+}
+
+/* Animation utilities */
+@layer utilities {
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
