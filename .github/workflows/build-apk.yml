@@ -6,24 +6,39 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      - name: Show directory structure
+        run: ls -la
+
       - name: Install dependencies
-        run: cd frontend && npm install
+        run: |
+          cd frontend
+          npm install
 
       - name: Build Web App
-        run: cd frontend && npm run build
+        run: |
+          cd frontend
+          npm run build
+          ls -la dist
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
@@ -31,13 +46,14 @@ jobs:
       - name: Copy web assets
         run: |
           cp -r frontend/dist/* frontend/android/app/src/main/assets/
+          ls frontend/android/app/src/main/assets/
 
       - name: Build Debug APK
         working-directory: ./frontend/android
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon -v
 
       - name: Upload APK
         if: success()
