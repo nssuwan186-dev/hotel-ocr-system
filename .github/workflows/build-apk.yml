@@ -3,16 +3,10 @@ name: Build Android APK
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
-
-permissions:
-  contents: write
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
+    runs-on: macos-14
     
     steps:
       - name: Checkout code
@@ -23,35 +17,28 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install frontend dependencies
-        run: cd frontend && npm install
-
-      - name: Build Web App
-        run: cd frontend && npm run build
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+      - name: Install and Build
+        run: |
+          cd frontend
+          npm install
+          npm run build
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Copy web assets
+      - name: Copy assets
         run: |
           cp -r frontend/dist/* frontend/android/app/src/main/assets/
 
-      - name: Build Debug APK
+      - name: Build APK
         working-directory: ./frontend/android
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: umi-hotel-debug-apk
+          name: umi-hotel-apk
           path: frontend/android/app/build/outputs/apk/debug/*.apk
